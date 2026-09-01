@@ -3,6 +3,7 @@ import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
+import { CatalogueProvider } from './contexts/CatalogueContext';
 import { LibraryProvider } from './contexts/LibraryContext';
 import { ShareProvider } from './contexts/ShareContext';
 import { PreferencesProvider } from './contexts/PreferencesContext';
@@ -50,16 +51,18 @@ export function App() {
   return (
     <BrowserRouter>
       <PreferencesProvider>
-        <LibraryProvider>
-          <ShareProvider>
-            <div className="flex min-h-screen w-full flex-col overflow-x-hidden bg-ink text-white">
-              <ScrollToTop />
-              <Navbar />
-              <AnimatedRoutes />
-              <Footer />
-            </div>
-          </ShareProvider>
-        </LibraryProvider>
+        <CatalogueProvider>
+          <LibraryProvider>
+            <ShareProvider>
+              <div className="flex min-h-screen w-full flex-col overflow-x-hidden bg-ink text-white">
+                <ScrollToTop />
+                <Navbar />
+                <AnimatedRoutes />
+                <Footer />
+              </div>
+            </ShareProvider>
+          </LibraryProvider>
+        </CatalogueProvider>
       </PreferencesProvider>
     </BrowserRouter>);
 

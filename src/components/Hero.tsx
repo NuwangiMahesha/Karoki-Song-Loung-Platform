@@ -2,7 +2,8 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { MicVocalIcon, MusicIcon, Music2Icon, Music4Icon, SparklesIcon } from 'lucide-react';
 import { SearchBar } from './SearchBar';
-import { HERO_IMAGE, songs } from '../data/songs';
+import { HERO_IMAGE } from '../data/songs';
+import { useCatalogue } from '../contexts/CatalogueContext';
 
 const notes = [
 { Icon: MusicIcon, left: '8%', top: '22%', delay: '0s', size: 'h-6 w-6' },
@@ -13,6 +14,7 @@ const notes = [
 
 
 export function Hero() {
+  const { catalogue: songs } = useCatalogue();
   return (
     <section className="relative isolate overflow-hidden">
       <img
@@ -61,7 +63,7 @@ export function Hero() {
               Explore songs
             </Link>
             <Link
-              to={`/song/${songs[0].slug}?karaoke=1`}
+              to={`/song/${songs[0]?.slug ?? ''}?karaoke=1`}
               className="inline-flex items-center gap-2 rounded-full bg-magenta px-6 py-3.5 text-sm font-semibold text-white shadow-glow transition-transform duration-150 ease-smooth hover:bg-magenta/90 active:scale-95">
               
               <MicVocalIcon className="h-4 w-4" />

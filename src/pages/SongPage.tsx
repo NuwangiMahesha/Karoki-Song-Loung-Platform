@@ -12,7 +12,7 @@ import {
   Share2Icon,
   XIcon } from
 'lucide-react';
-import { getSongBySlug, songs } from '../data/songs';
+import { useCatalogue } from '../contexts/CatalogueContext';
 import type { Language } from '../types/song';
 import { VideoStage } from '../components/VideoStage';
 import { PlayerControls } from '../components/PlayerControls';
@@ -31,8 +31,9 @@ import { formatPlays, formatTime } from '../utils/format';
 export function SongPage() {
   const { slug = '' } = useParams();
   const [params] = useSearchParams();
-  const song = getSongBySlug(slug);
-  const loading = useSimulatedLoad(420, [slug]);
+  const { catalogue: songs, loading: catalogueLoading } = useCatalogue();
+  const song = useMemo(() => songs.find(s => s.slug === slug), [songs, slug]);
+  const loading = useSimulatedLoad(420, [slug]) || catalogueLoading;
 
   const { markPlayed, saveProgress } = useLibrary();
   const { openShare } = useShare();
@@ -125,7 +126,7 @@ export function SongPage() {
     slice(0, 10);
   }, [song]);
 
-  if (!song) {
+  if (!song && !loading) {
     return (
       <div className="mx-auto w-full max-w-[1600px] px-4 py-24 sm:px-6 lg:px-10">
         <EmptyState
@@ -194,12 +195,16 @@ export function SongPage() {
           <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1.55fr)_minmax(0,1fr)]">
             <div ref={stageRef} className="space-y-4 bg-ink">
               <VideoStage
-              song={song}
-              playing={playing}
-              time={time}
-              currentLine={currentLine}
-              karaokeMode={false}
-              onToggle={toggle} />
+                song={song}
+                playing={playing}
+                time={time}
+                currentLine={currentLine}
+                karaokeMode={false}
+                volume={playback.volume}
+                muted={playback.muted}
+                onToggle={toggle}
+                onSeek={playback.seek}
+              />
             
               <PlayerControls
               playback={playback}
@@ -273,12 +278,16 @@ export function SongPage() {
 
             <div className="mx-auto flex w-full max-w-5xl flex-1 flex-col justify-center gap-4 px-4 pb-6 sm:px-8">
               <VideoStage
-              song={song}
-              playing={playing}
-              time={time}
-              currentLine={currentLine}
-              karaokeMode
-              onToggle={toggle} />
+                song={song}
+                playing={playing}
+                time={time}
+                currentLine={currentLine}
+                karaokeMode={true}
+                volume={playback.volume}
+                muted={playback.muted}
+                onToggle={toggle}
+                onSeek={playback.seek}
+              />
             
               <LyricsDisplay lines={lines} time={time} karaokeMode onSeek={seek} />
               <div className="flex items-center justify-center gap-4">

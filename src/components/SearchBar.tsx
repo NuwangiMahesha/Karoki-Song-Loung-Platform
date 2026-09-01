@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SearchIcon, XIcon } from 'lucide-react';
-import { songs } from '../data/songs';
+import { useCatalogue } from '../contexts/CatalogueContext';
 import { searchSongs } from '../utils/search';
 import { useDebounced } from '../hooks/useDebounced';
 
@@ -21,10 +21,12 @@ export function SearchBar({
   const debounced = useDebounced(query, 140);
   const navigate = useNavigate();
   const wrap = useRef<HTMLDivElement>(null);
+  
+  const { catalogue: songs } = useCatalogue();
 
   const results = useMemo(
     () => debounced.trim() ? searchSongs(songs, debounced).slice(0, 6) : [],
-    [debounced]
+    [debounced, songs]
   );
 
   useEffect(() => {

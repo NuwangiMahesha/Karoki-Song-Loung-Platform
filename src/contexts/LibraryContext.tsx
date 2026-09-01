@@ -7,7 +7,7 @@ import React, {
   useState } from
 'react';
 import type { PlaybackProgress, Song } from '../types/song';
-import { songs } from '../data/songs';
+import { useCatalogue } from './CatalogueContext';
 
 const KEY = 'karaoke-lounge:v1';
 
@@ -93,6 +93,8 @@ export function LibraryProvider({ children }: {children: React.ReactNode;}) {
     });
   }, []);
 
+  const { catalogue: songs } = useCatalogue();
+
   const value = useMemo<LibraryValue>(() => {
     const byId = new Map(songs.map((song) => [song.id, song]));
     const favouriteSongs = state.favourites.
@@ -126,7 +128,7 @@ export function LibraryProvider({ children }: {children: React.ReactNode;}) {
       recentSongs,
       continueSong
     };
-  }, [state, toggleFavourite, markPlayed, saveProgress, clearProgress]);
+  }, [state, toggleFavourite, markPlayed, saveProgress, clearProgress, songs]);
 
   return <LibraryContext.Provider value={value}>{children}</LibraryContext.Provider>;
 }

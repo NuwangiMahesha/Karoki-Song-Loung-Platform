@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react";
+import { useCatalogue } from "../contexts/CatalogueContext";
 import { BarChart3Icon, LayoutDashboardIcon, LibraryBigIcon, MicVocalIcon, PencilIcon, PlusIcon, SearchIcon, StarIcon, TagsIcon, Trash2Icon, UsersIcon, BoxIcon } from "lucide-react";
 import { songs as seedSongs, allEras, allLanguages } from "../data/songs";
 import { Era, Song } from "../types/song";
@@ -95,15 +96,17 @@ function Bars({
 }
 export function Admin() {
   const [view, setView] = useState<View>('dashboard');
-  const [catalogue, setCatalogue] = useState<Song[]>(seedSongs);
+  const { catalogue, loading, saveSong, removeSong } = useCatalogue();
   const [editing, setEditing] = useState<Song | null>(null);
   const [editorOpen, setEditorOpen] = useState(false);
   const [query, setQuery] = useState('');
+  
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return catalogue;
     return catalogue.filter((song) => `${song.title} ${song.artist} ${song.era} ${song.language}`.toLowerCase().includes(q));
   }, [catalogue, query]);
+  
   const stats = useMemo(() => {
     const lyricLines = catalogue.reduce((total, song) => total + Object.values(song.lyrics).reduce((sum, lines) => sum + (lines?.length ?? 0), 0), 0);
     return {
@@ -113,27 +116,37 @@ export function Admin() {
       plays: catalogue.reduce((total, song) => total + song.plays, 0)
     };
   }, [catalogue]);
+  
   const eraData = useMemo(() => allEras.map((era) => ({
     label: era,
     value: catalogue.filter((song) => song.era === era).reduce((sum, s) => sum + s.plays, 0)
   })), [catalogue]);
+  
   const languageData = useMemo(() => allLanguages.map((language) => ({
     label: language,
     value: catalogue.filter((song) => song.language === language).reduce((sum, s) => sum + s.plays, 0)
   })), [catalogue]);
-  const save = (song: Song) => {
-    setCatalogue((prev) => {
-      const exists = prev.some((item) => item.id === song.id);
-      return exists ? prev.map((item) => item.id === song.id ? song : item) : [song, ...prev];
-    });
+  
+  const save = async (song: Song) => {
+    await saveSong(song);
     setEditorOpen(false);
     setEditing(null);
   };
-  const remove = (id: string) => setCatalogue((prev) => prev.filter((song) => song.id !== id));
+  
+  const remove = async (id: string) => {
+    if (confirm("Are you sure you want to delete this song?")) {
+      await removeSong(id);
+    }
+  };
+  
   const openEditor = (song: Song | null) => {
     setEditing(song);
     setEditorOpen(true);
   };
+
+  if (loading) {
+    return <div className="p-20 text-center">Loading catalogue from Supabase...</div>;
+  }
   return <div className="mx-auto w-full max-w-[1600px] px-4 pb-16 pt-10 sm:px-6 lg:px-10">
       <header className="mb-8 flex flex-wrap items-end justify-between gap-4">
         <div>

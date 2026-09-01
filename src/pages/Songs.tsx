@@ -1,7 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { SearchIcon, SlidersHorizontalIcon, XIcon } from 'lucide-react';
-import { allEras, songs } from '../data/songs';
+import { allEras } from '../data/songs';
+import { useCatalogue } from '../contexts/CatalogueContext';
 import { SongCard } from '../components/SongCard';
 import { FilterBar } from '../components/FilterBar';
 import { SongGridSkeleton } from '../components/Skeletons';
@@ -16,6 +17,8 @@ export function Songs() {
   const [params, setParams] = useSearchParams();
   const initialQuery = params.get('q') ?? '';
   const eraParam = params.get('era');
+  
+  const { catalogue: songs, loading: catalogueLoading } = useCatalogue();
 
   const parseEras = (value: string | null): Era[] =>
   (value ?? '').
@@ -30,7 +33,7 @@ export function Songs() {
   }));
   const [showFilters, setShowFilters] = useState(false);
   const debouncedQuery = useDebounced(query, 140);
-  const loading = useSimulatedLoad(450, [eraParam]);
+  const loading = useSimulatedLoad(450, [eraParam]) || catalogueLoading;
 
   useEffect(() => {
     setQuery(params.get('q') ?? '');

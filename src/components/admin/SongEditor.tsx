@@ -73,14 +73,14 @@ export function SongEditor({ song, onClose, onSave }: Props) {
   const submit = (event: React.FormEvent) => {
     event.preventDefault();
     const lines = parseTimeline(timeline);
-    const slug = draft.title.
-    toLowerCase().
-    replace(/[^a-z0-9]+/g, '-').
-    replace(/^-|-$/g, '');
+    const baseSlug = draft.title.toLowerCase().replace(/\s+/g, '-').replace(/[^\p{L}\p{N}-]+/gu, '').replace(/^-|-$/g, '');
+    const finalSlug = baseSlug || draft.slug || `song-${Date.now()}`;
+    const newId = draft.id || `sng-${Date.now()}`;
+    
     onSave({
       ...draft,
-      slug: slug || draft.slug,
-      id: draft.id || `sng-${Date.now()}`,
+      slug: finalSlug,
+      id: newId,
       lyrics: { ...draft.lyrics, [lyricLanguage]: lines },
       duration: lines.length ? Math.max(draft.duration, lines[lines.length - 1].end + 8) : draft.duration
     });
